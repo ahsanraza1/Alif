@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>4. If and while — علیف v1</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>Lesson 4 of 6 &nbsp;|&nbsp; If and while</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+</td>
+<td class="main">
+
+<h2>4. If and while</h2>
+
+<p>Blocks use ASCII braces <code>{ }</code>. The condition is an expression.
+Nonzero is true.</p>
+
+<h3>If / else</h3>
+
+<p><span dir="rtl"><b>اگر</b></span> … optional <span dir="rtl"><b>ورنہ</b></span> …</p>
+
+<pre class="urdu">شروع
+عدد ن = 3؛
+اگر ن > 0 {
+    لکھو ن؛
+} ورنہ {
+    لکھو 0؛
+}
+ختم</pre>
+
+<p>This prints <b>3</b>. You may omit <span dir="rtl">ورنہ</span> and its block.</p>
+
+<h3>While</h3>
+
+<p><span dir="rtl"><b>جبتک</b></span> is one word. Do not write a space inside it.</p>
+
+<pre class="urdu">شروع
+عدد ن = 3؛
+جبتک ن > 0 {
+    لکھو ن؛
+    ن = ن - 1؛
+}
+ختم</pre>
+
+<p>This prints three lines: <b>3</b>, then <b>2</b>, then <b>1</b>.</p>
+
+<p>There is no <code>break</code> or <code>continue</code> in v1. Change the condition
+or the counter so the loop can end. A loop that never becomes false will hit the
+VM step cap and fault.</p>
+
+<h3>A combined test</h3>
+
+<pre class="urdu">اگر ن > 0 اور ن &lt; 10 {
+    لکھو ن؛
+}</pre>
+
+<p><span dir="rtl">اور</span> does not evaluate the right side if the left is already zero.
+<span dir="rtl">یا</span> does not evaluate the right side if the left is already nonzero.</p>
+
+<p class="next">
+<a href="calc.html">&lt;&lt; Arithmetic</a>
+&nbsp;|&nbsp;
+<a href="io.html">Next: Print and read &gt;&gt;</a>
+</p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML.</td>
+</tr>
+</table>
+</body>
+</html>

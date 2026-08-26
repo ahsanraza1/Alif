@@ -18,6 +18,7 @@ ALIF is a custom **register-based virtual machine** written in pure C. The machi
 | [`alifc/`](alifc/) | optional compiler | **`alifc`**: `.alif` (UTF-8 or AF8) → `.afb` |
 | [`af8/`](af8/) | compiler encoding | **AF8**: 8-bit Urdu codes for `.alif` source (not used by the VM) |
 | [`lang/`](lang/) | source language | **علیف** grammar (`alifc` compiles it) |
+| [`web/`](web/) | tutorial | Static HTML handbook for علیف v1 (`web/index.html`) |
 | [`examples/`](examples/) | programs | `.afb` sources and `.afbin` images |
 | [`tests/smoke.c`](tests/smoke.c) | bring-up | ALU, RAM, and fault-class checks |
 

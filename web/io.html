@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>5. Print and read — علیف v1</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>Lesson 5 of 6 &nbsp;|&nbsp; Print and read</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+</td>
+<td class="main">
+
+<h2>5. Print and read</h2>
+
+<h3>Print</h3>
+
+<p><span dir="rtl"><b>لکھو</b></span> writes an integer in decimal, then a newline.
+The expression may be a name or any other expression.</p>
+
+<pre class="urdu">لکھو الف + ب؛
+لکھو 1؛</pre>
+
+<p>There are no strings in v1. You cannot print a sentence, only numbers.</p>
+
+<h3>Read</h3>
+
+<p><span dir="rtl"><b>پڑھو</b></span> stores into a name that already exists:</p>
+
+<pre class="urdu">عدد ن = 0؛
+پڑھو ن؛</pre>
+
+<p><b>Honest limit:</b> version 1 reads <b>one byte</b> from VM port 0 and zero-extends it
+into the variable. It is not “type a decimal number and press Enter.”
+A later language version can define that. For class examples, prefer
+<span dir="rtl">لکھو</span> and literals.</p>
+
+<h3>Comments</h3>
+
+<p>ASCII <code>//</code> to end of line. Useful above a trick:</p>
+
+<pre class="urdu">شروع
+// countdown
+عدد ن = 3؛
+جبتک ن > 0 {
+    لکھو ن؛
+    ن = ن - 1؛
+}
+ختم</pre>
+
+<p class="next">
+<a href="cond.html">&lt;&lt; If and while</a>
+&nbsp;|&nbsp;
+<a href="run.html">Next: How to run &gt;&gt;</a>
+</p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML.</td>
+</tr>
+</table>
+</body>
+</html>

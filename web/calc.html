@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>3. Arithmetic — علیف v1</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>Lesson 3 of 6 &nbsp;|&nbsp; Arithmetic</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+</td>
+<td class="main">
+
+<h2>3. Arithmetic</h2>
+
+<p>Operators are <b>ASCII</b>. Keywords for and / or / not are Urdu.</p>
+
+<table class="grid">
+<tr><th>Token</th><th>Meaning</th></tr>
+<tr><td><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code></td>
+<td>add, subtract, multiply, divide, remainder. <code>/</code> and <code>%</code> are unsigned, like the VM.</td></tr>
+<tr><td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td>
+<td>compare; the result is <code>0</code> or <code>1</code></td></tr>
+<tr><td class="ur">اور</td><td>and (short-circuit: stops on first zero)</td></tr>
+<tr><td class="ur">یا</td><td>or (short-circuit: stops on first nonzero)</td></tr>
+<tr><td class="ur">نہیں</td><td>not (zero becomes 1, nonzero becomes 0)</td></tr>
+<tr><td><code>( )</code></td><td>group an expression</td></tr>
+</table>
+
+<p>Assignment <code>=</code> is only in a declaration or a statement, not inside a larger expression.</p>
+
+<h3>Order</h3>
+
+<p>From bind-tightest to loosest:</p>
+<ol>
+<li>unary <span dir="rtl">نہیں</span>, unary <code>+</code>, unary <code>-</code></li>
+<li><code>*</code> <code>/</code> <code>%</code></li>
+<li><code>+</code> <code>-</code></li>
+<li>comparisons</li>
+<li><span dir="rtl">اور</span></li>
+<li><span dir="rtl">یا</span></li>
+</ol>
+
+<pre class="urdu">عدد جواب = (الف + ب) * 2؛</pre>
+
+<h3>Numbers</h3>
+
+<p>A literal in v1 must fit in a 16-bit immediate: <b>0 to 65535</b>.
+You may write ASCII digits <code>12</code> or Urdu digits <span dir="rtl">۱۲</span>.
+Do not mix them in one number (<code>1</code> then <span dir="rtl">۲</span> is illegal).</p>
+
+<p>Divide by zero stops the VM (<code>FAULT_DIV0</code>).</p>
+
+<h3>Unary minus</h3>
+
+<pre class="urdu">عدد ن = -3؛</pre>
+
+<p>(The compiler uses the VM’s negate instruction. The digits themselves stay in 0..65535.)</p>
+
+<p class="next">
+<a href="names.html">&lt;&lt; Names</a>
+&nbsp;|&nbsp;
+<a href="cond.html">Next: If and while &gt;&gt;</a>
+</p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML.</td>
+</tr>
+</table>
+</body>
+</html>

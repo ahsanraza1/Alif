@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>علیف v1 — a tutorial</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>A tutorial for version 1 &nbsp;|&nbsp; Urdu source, ASCII operators, 32-bit integers</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+<br>
+<b>This site</b>
+<p>Static HTML. Open <code>index.html</code> or copy the <code>web</code> folder to any host.</p>
+</td>
+<td class="main">
+
+<h2>Welcome</h2>
+
+<p><b>علیف</b> (Alif) version 1 is a small programming language written in Urdu.
+You type a <code>.alif</code> file in a text editor (UTF-8), then a compiler turns it into
+assembly, an assembler turns that into a machine image, and a virtual machine runs it.</p>
+
+<pre>
+.alif   Urdu source     (you write this)
+  |
+  |  alifc
+  v
+.afb    assembly        (ASCII)
+  |
+  |  afas
+  v
+.afbin  machine image
+  |
+  |  alif.exe
+  v
+        the VM prints numbers
+</pre>
+
+<p>The three tools stay separate. A small script <code>run.bat</code> in the <code>ship</code>
+folder calls them in that order so you do not have to.</p>
+
+<h2>What v1 can do</h2>
+
+<p>One type: a 32-bit integer. You can:</p>
+<ul>
+<li>declare names with <span dir="rtl"><code>عدد</code></span> and assign with <code>=</code></li>
+<li>add, subtract, multiply, divide, remainder</li>
+<li>compare with <code>== != &lt; &gt; &lt;= &gt;=</code></li>
+<li>branch with <span dir="rtl"><code>اگر</code></span> / <span dir="rtl"><code>ورنہ</code></span></li>
+<li>loop with <span dir="rtl"><code>جبتک</code></span></li>
+<li>print a number with <span dir="rtl"><code>لکھو</code></span></li>
+<li>read one input byte with <span dir="rtl"><code>پڑھو</code></span></li>
+</ul>
+
+<p>There are no functions, arrays, or strings yet. That is on purpose. Finish these pages,
+then write small programs.</p>
+
+<h2>A taste</h2>
+
+<p>This program prints <b>8</b>:</p>
+
+<pre class="urdu">شروع
+عدد الف = 2؛
+عدد ب = 6؛
+عدد جواب = الف + ب؛
+لکھو جواب؛
+ختم</pre>
+
+<p>Keywords and names are Urdu. Operators, digits here, and braces are ASCII.
+Statements end with the Urdu semicolon <code>؛</code> (ASCII <code>;</code> is also allowed).
+This handbook shows Urdu samples <b>right-to-left</b>. Many English editors still show
+the same bytes left-aligned; the file is still correct.</p>
+
+<h2>Lessons</h2>
+
+<ol>
+<li><a href="start.html">First program</a> — <span dir="rtl">شروع</span> and <span dir="rtl">ختم</span></li>
+<li><a href="names.html">Names</a> — <span dir="rtl">عدد</span>, assignment, one type</li>
+<li><a href="calc.html">Arithmetic</a> — operators, true and false</li>
+<li><a href="cond.html">If and while</a> — <span dir="rtl">اگر</span>, <span dir="rtl">ورنہ</span>, <span dir="rtl">جبتک</span></li>
+<li><a href="io.html">Print and read</a> — <span dir="rtl">لکھو</span>, <span dir="rtl">پڑھو</span>, comments</li>
+<li><a href="run.html">How to run</a> — <code>ship\run.bat</code> and the three tools</li>
+</ol>
+
+<p>Keep the <a href="ref.html">reference</a> open when you write code.</p>
+
+<p class="next"><a href="start.html">Next: First program &gt;&gt;</a></p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML. Not the VM; this folder only teaches the language.</td>
+</tr>
+</table>
+</body>
+</html>

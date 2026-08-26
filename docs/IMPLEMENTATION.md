@@ -20,6 +20,7 @@ afas/README.md       assembly language
 af8/                 AF8 8-bit Urdu page for .alif (VM-independent)
 lang/                علیف language grammar and keyword bytes
 alifc/               compiler .alif → .afb (does not run the VM)
+web/                 static HTML tutorial for علیف v1 (open web/index.html)
 tests/smoke.c        bring-up: ALU, RAM, and every fault class
 tests/mk_examples.c  writes examples/add.afbin and examples/hello.afbin
 build.bat            gcc build on Windows (no make); fills ship\

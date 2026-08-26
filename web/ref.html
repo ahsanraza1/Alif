@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Reference — علیف v1</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>Reference &nbsp;|&nbsp; keywords, grammar, limits</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+</td>
+<td class="main">
+
+<h2>Keywords</h2>
+
+<p>One word, no space inside. Cannot be variable names.</p>
+
+<table class="grid">
+<tr><th>Urdu</th><th>Role</th><th>Rough English</th></tr>
+<tr><td class="ur">شروع</td><td>program start</td><td>begin</td></tr>
+<tr><td class="ur">ختم</td><td>program end</td><td>end (halt)</td></tr>
+<tr><td class="ur">عدد</td><td>integer binding</td><td>int</td></tr>
+<tr><td class="ur">اگر</td><td>if</td><td>if</td></tr>
+<tr><td class="ur">ورنہ</td><td>else</td><td>else</td></tr>
+<tr><td class="ur">جبتک</td><td>while</td><td>while</td></tr>
+<tr><td class="ur">لکھو</td><td>print number + newline</td><td>print</td></tr>
+<tr><td class="ur">پڑھو</td><td>read one byte into a name</td><td>read</td></tr>
+<tr><td class="ur">اور</td><td>logical and</td><td>&amp;&amp;</td></tr>
+<tr><td class="ur">یا</td><td>logical or</td><td>||</td></tr>
+<tr><td class="ur">نہیں</td><td>logical not</td><td>!</td></tr>
+<tr><td class="ur">سچ</td><td>true (1)</td><td>true</td></tr>
+<tr><td class="ur">جھوٹ</td><td>false (0)</td><td>false</td></tr>
+</table>
+
+<h2>Grammar (v1)</h2>
+
+<pre>
+program     = "شروع" { stmt } "ختم" ;
+
+stmt        = decl | assign | print | read | if | while ;
+
+decl        = "عدد" ident "=" expr "؛" ;
+assign      = ident "=" expr "؛" ;
+print       = "لکھو" expr "؛" ;
+read        = "پڑھو" ident "؛" ;
+
+if          = "اگر" expr block [ "ورنہ" block ] ;
+while       = "جبتک" expr block ;
+block       = "{" { stmt } "}" ;
+
+expr        = or ;
+or          = and { "یا" and } ;
+and         = cmp { "اور" cmp } ;
+cmp         = add { ( "==" | "!=" | "&lt;" | "&gt;" | "&lt;=" | "&gt;=" ) add } ;
+add         = mul { ( "+" | "-" ) mul } ;
+mul         = unary { ( "*" | "/" | "%" ) unary } ;
+unary       = "نہیں" unary | "+" unary | "-" unary | primary ;
+primary     = number | "سچ" | "جھوٹ" | ident | "(" expr ")" ;
+</pre>
+
+<p><code>؛</code> or ASCII <code>;</code> ends a simple statement.
+<code>//</code> comments. File encoding: UTF-8 (editor) or AF8 (bytes).</p>
+
+<h2>What v1 does not have</h2>
+
+<ul>
+<li>functions</li>
+<li>arrays</li>
+<li>strings</li>
+<li>break / continue</li>
+<li>floats</li>
+<li>modules, pointers, a heap</li>
+</ul>
+
+<p>Literals above 65535 are not allowed yet (the move-immediate instruction is 16-bit).</p>
+
+<h2>Three sample programs</h2>
+
+<p><b>Add</b> — prints 8</p>
+<pre class="urdu">شروع
+عدد الف = 2؛
+عدد ب = 6؛
+عدد جواب = الف + ب؛
+لکھو جواب؛
+ختم</pre>
+
+<p><b>If</b> — prints 3</p>
+<pre class="urdu">شروع
+عدد ن = 3؛
+اگر ن > 0 {
+    لکھو ن؛
+} ورنہ {
+    لکھو 0؛
+}
+ختم</pre>
+
+<p><b>Loop</b> — prints 3, 2, 1</p>
+<pre class="urdu">شروع
+عدد ن = 3؛
+جبتک ن > 0 {
+    لکھو ن؛
+    ن = ن - 1؛
+}
+ختم</pre>
+
+<p class="next"><a href="index.html">&lt;&lt; Home</a></p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML. Language contract: lang/ in the ALIF tree.</td>
+</tr>
+</table>
+</body>
+</html>

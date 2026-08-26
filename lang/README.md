@@ -210,3 +210,4 @@ Functions, arrays, strings, `break`/`continue`, floats, modules, pointers. Add t
 | [`GRAMMAR.md`](GRAMMAR.md) | token rules + keyword AF8 bytes |
 | [`keywords.h`](keywords.h) | reserved words as AF8 macros |
 | Compiler | [`../alifc/`](../alifc/) **`alifc`**: `.alif` → `.afb` |
+| Tutorial | [`../web/index.html`](../web/index.html) handbook for v1 |

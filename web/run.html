@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>6. How to run — علیف v1</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>Lesson 6 of 6 &nbsp;|&nbsp; How to run</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+</td>
+<td class="main">
+
+<h2>6. How to run</h2>
+
+<p>From the ALIF project, run <code>build.bat</code> once. That compiles the three tools
+and copies them into a folder named <code>ship</code> (not stored in git).
+You can copy <code>ship</code> to another machine.</p>
+
+<h3>The easy way</h3>
+
+<p>Put your source next to the tools or pass a path. The file name must end in
+<code>.alif</code>.</p>
+
+<pre>ship\run.bat add.alif</pre>
+
+<p><code>run.bat</code> only calls, in order:</p>
+<ol>
+<li><code>alifc.exe</code> — <code>.alif</code> to <code>.afb</code></li>
+<li><code>afas.exe</code> — <code>.afb</code> to <code>.afbin</code></li>
+<li><code>alif.exe</code> — run the image</li>
+</ol>
+
+<p>It writes <code>add.afb</code> and <code>add.afbin</code> beside <code>add.alif</code>,
+then prints whatever <span dir="rtl">لکھو</span> produced.</p>
+
+<h3>The three tools by hand</h3>
+
+<pre>alifc.exe add.alif
+afas.exe add.afb
+alif.exe add.afbin</pre>
+
+<p>Each program refuses the wrong suffix. The VM never reads Urdu source.
+The assembler never reads <code>.alif</code>.</p>
+
+<h3>How to type source</h3>
+
+<p>Save <code>.alif</code> as <b>UTF-8</b> in any ordinary editor. Urdu letters must be real
+Unicode, not <code>?</code>. A UTF-8 BOM is allowed.</p>
+
+<p>Do not open an old AF8-byte file in a UTF-8 editor and save. That replaces letters
+with U+FFFD and the program is lost. If that happens, type the program again.</p>
+
+<p>English editors often show Urdu <b>left-aligned</b>. The compiler does not care.
+This tutorial shows samples on the right so you can read them as Urdu.</p>
+
+<h3>If it fails</h3>
+
+<table class="grid">
+<tr><th>Message idea</th><th>Usual cause</th></tr>
+<tr><td><code>expected shuru</code></td><td>file does not start with <span dir="rtl">شروع</span></td></tr>
+<tr><td><code>unknown name</code></td><td>used a name before <span dir="rtl">عدد</span></td></tr>
+<tr><td><code>literal must fit MOVI</code></td><td>number bigger than 65535</td></tr>
+<tr><td><code>harakat not allowed</code></td><td>vowel marks on letters</td></tr>
+<tr><td><code>U+FFFD</code></td><td>source was destroyed by a bad save</td></tr>
+<tr><td>VM fault 2</td><td>e.g. divide by zero, or a runaway loop</td></tr>
+</table>
+
+<p class="next">
+<a href="io.html">&lt;&lt; Print and read</a>
+&nbsp;|&nbsp;
+<a href="ref.html">Reference &gt;&gt;</a>
+</p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML.</td>
+</tr>
+</table>
+</body>
+</html>

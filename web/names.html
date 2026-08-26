@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>2. Names — علیف v1</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<table class="page" cellspacing="0" cellpadding="0" border="0">
+<tr>
+<td class="banner" colspan="2">
+<h1>علیف</h1>
+<p>Lesson 2 of 6 &nbsp;|&nbsp; Names</p>
+</td>
+</tr>
+<tr>
+<td class="nav">
+<b>Lessons</b><br><br>
+<p><a href="index.html">Home</a></p>
+<p>1. <a href="start.html">First program</a></p>
+<p>2. <a href="names.html">Names</a></p>
+<p>3. <a href="calc.html">Arithmetic</a></p>
+<p>4. <a href="cond.html">If and while</a></p>
+<p>5. <a href="io.html">Print and read</a></p>
+<p>6. <a href="run.html">How to run</a></p>
+<p><a href="ref.html">Reference</a></p>
+</td>
+<td class="main">
+
+<h2>2. Names</h2>
+
+<p>Version 1 has <b>one type</b>: a 32-bit integer. The keyword
+<span dir="rtl"><b>عدد</b></span> introduces a name. You must give it a value at once.</p>
+
+<pre class="urdu">عدد الف = 2؛</pre>
+
+<p>Later you may assign again, without <span dir="rtl">عدد</span>:</p>
+
+<pre class="urdu">الف = الف + 1؛</pre>
+
+<p>A name you never declared is an error. Declaring the same name twice is an error.</p>
+
+<h3>What a name looks like</h3>
+
+<p>Start with an Urdu letter. Then letters or digits (ASCII or Urdu digits).
+Keywords cannot be names.</p>
+
+<table class="grid">
+<tr><th>Good</th><th>Notes</th></tr>
+<tr><td class="ur">الف</td><td>suggested short name</td></tr>
+<tr><td class="ur">ب</td><td>one letter</td></tr>
+<tr><td class="ur">جواب</td><td>result</td></tr>
+<tr><td class="ur">ن</td><td>often a counter</td></tr>
+</table>
+
+<h3>Where values live</h3>
+
+<p>The compiler keeps variables in the VM’s RAM (one word each), not in the eight
+named registers. You can have many names; the limit is a few hundred bytes of
+variable space, not eight.</p>
+
+<h3>True and false</h3>
+
+<p><span dir="rtl"><b>سچ</b></span> is the integer <b>1</b>.
+<span dir="rtl"><b>جھوٹ</b></span> is <b>0</b>.
+<span dir="rtl">اگر</span> and <span dir="rtl">جبتک</span> treat <b>any nonzero value as true</b>.</p>
+
+<pre class="urdu">عدد پرچم = سچ؛</pre>
+
+<p class="next">
+<a href="start.html">&lt;&lt; First program</a>
+&nbsp;|&nbsp;
+<a href="calc.html">Next: Arithmetic &gt;&gt;</a>
+</p>
+
+</td>
+</tr>
+<tr>
+<td class="foot" colspan="2">علیف v1 tutorial. Plain HTML.</td>
+</tr>
+</table>
+</body>
+</html>
