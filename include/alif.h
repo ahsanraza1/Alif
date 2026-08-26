@@ -5,8 +5,9 @@
  * ALIF execution engine — public machine state and entry point.
  *
  * Bytecode is an array of unsigned char (little-endian 32-bit words).
- * Data/stack live in a separate 1 KiB RAM block. See docs/ISA.md §2
- * and docs/IMPLEMENTATION.md.
+ * Data/stack live in a separate 1 KiB RAM block. The `alif` launcher
+ * (`src/alif.c`) loads a `.afbin` file and calls `alif_exec_from`.
+ * See docs/ISA.md §10 and docs/IMPLEMENTATION.md.
  */
 
 #include "opcodes.h"
@@ -47,5 +48,10 @@ void alif_vm_init(struct alif_vm *vm);
  * regs[] / ram[] / the caller’s bytecode buffer (read-only).
  */
 int  alif_exec(struct alif_vm *vm, const unsigned char *code, size_t code_len);
+
+/* Same as alif_exec, but start at byte offset `entry` in `code` (must be
+ * 4-aligned and inside the payload). Used by the .afbin loader. */
+int  alif_exec_from(struct alif_vm *vm, const unsigned char *code, size_t code_len,
+                    unsigned int entry);
 
 #endif /* ALIF_H */

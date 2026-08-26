@@ -8,7 +8,11 @@
  *   docs/ISA.md              instruction set, encodings, semantics
  *   docs/IMPLEMENTATION.md   execution engine, bounds checks, memory
  *   include/alif.h           machine state (regs, 1 KiB RAM, IP)
+ *   include/alf.h            .afbin image header / loader API
  *   src/vm.c                 fetch-decode-execute loop
+ *   src/load.c               .afbin file loader
+ *   src/alif.c               launcher (binary name: alif)
+ *   examples/                .afbin programs the launcher runs
  *   README.md                project index
  *
  * Instruction word (MSB = bit 31). Three overlays of the same 32 bits:

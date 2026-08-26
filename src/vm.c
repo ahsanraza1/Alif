@@ -181,16 +181,26 @@ void alif_vm_init(struct alif_vm *vm)
 
 int alif_exec(struct alif_vm *vm, const unsigned char *code, size_t code_len)
 {
+    return alif_exec_from(vm, code, code_len, 0);
+}
+
+int alif_exec_from(struct alif_vm *vm, const unsigned char *code, size_t code_len,
+                   unsigned int entry)
+{
     if (vm == NULL)
         return ALIF_FAULT_ILL;
 
-    vm->ip        = 0;
     vm->halt      = 0;
     vm->fault     = ALIF_OK;
     vm->trap_code = 0;
     vm->steps     = 0;
+    vm->ip        = entry;
 
     if (code == NULL || code_len < (size_t)ALIF_INSN_BYTES)
+        return fault(vm, ALIF_FAULT_MEM);
+    if ((entry & 3u) != 0u)
+        return fault(vm, ALIF_FAULT_ALIGN);
+    if ((size_t)entry >= code_len || code_len - (size_t)entry < (size_t)ALIF_INSN_BYTES)
         return fault(vm, ALIF_FAULT_MEM);
 
     while (!vm->halt) {

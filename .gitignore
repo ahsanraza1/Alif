@@ -1,0 +1,31 @@
+# Build products
+/alif
+/alif.exe
+*.exe
+*.o
+*.obj
+*.a
+*.dll
+*.so
+
+# Test helpers (no extension on Unix)
+/tests/smoke
+/tests/mk_examples
+/tests/mk_add
+
+# Generated duplicate of examples/add.afbin
+/tests/add.afbin
+
+# Retired program extension
+*.alf
+
+# Editor / OS
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vs/
+.vscode/
+*.user

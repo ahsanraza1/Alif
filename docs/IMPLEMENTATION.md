@@ -1,6 +1,6 @@
 # ALIF implementation notes
 
-Companion to [`ISA.md`](ISA.md). Describes the C engine that actually ships: `include/alif.h` + `src/vm.c`.
+Companion to [`ISA.md`](ISA.md). Describes the C engine that actually ships: `include/alif.h` + `src/vm.c`, plus the `.afbin` loader/launcher.
 
 ---
 
@@ -9,17 +9,33 @@ Companion to [`ISA.md`](ISA.md). Describes the C engine that actually ships: `in
 ```
 include/opcodes.h    numeric ISA (defines only)
 include/alif.h       struct alif_vm, ALIF_RAM_SIZE, fault codes, API
+include/alf.h        .afbin on-disk header, alif_load_afbin / alif_write_afbin
 src/vm.c             fetch-decode-execute loop
+src/load.c           .afbin reader/writer
+src/alif.c           launcher main (binary name: alif)
+examples/*.afbin     programs (the only files alif runs)
+examples/README.md   how to write a .afbin by hand
 tests/smoke.c        bring-up: ALU, RAM, and every fault class
+tests/mk_examples.c  writes examples/add.afbin and examples/hello.afbin
+Makefile             builds alif
+.gitignore           host binaries, *.exe, retired *.alf
 ```
 
 Build (from the repo root):
 
 ```
-cc -I include -o tests/smoke tests/smoke.c src/vm.c
+make            # gcc -o alif src/alif.c src/load.c src/vm.c
+make examples   # emit examples/*.afbin
+make smoke      # engine tests + alif examples/add.afbin and hello.afbin
 ```
 
-`opcodes.h` stays **defines only**. The engine is ordinary C in `vm.c`.
+Windows without make:
+
+```
+gcc -std=c11 -Wall -Wextra -Werror -I include -o alif src/alif.c src/load.c src/vm.c
+```
+
+`opcodes.h` stays **defines only**. The engine is ordinary C in `vm.c`. The launcher is the only program that talks to the filesystem.
 
 ---
 
@@ -170,11 +186,27 @@ payload[i+2] = (unsigned char)(word >> 16);
 payload[i+3] = (unsigned char)(word >> 24);
 ```
 
-Worked values: ISA §9. `tests/smoke.c` encodes the `2+3` program the same way.
+Worked values: ISA §9. `tests/smoke.c` encodes the `2+3` program the same way. `tests/mk_examples.c` packs it into `examples/add.afbin` (the file programmers ship).
 
 ---
 
-## 11. Safety checklist (enforced in `vm.c`)
+## 11. The `alif` launcher
+
+`src/alif.c` is the host program. It does not decode opcodes; it only:
+
+1. Requires `argv[1]` ending in `.afbin` (usage otherwise).
+2. Calls `alif_load_afbin` (`src/load.c`).
+3. `alif_vm_init`, copies the data section into `vm.ram`.
+4. `alif_exec_from(..., img.entry)`.
+5. Maps the result to a process exit code (ISA §10.2).
+
+Loader rejects: path not ending in `.afbin`, missing file, short file, bad magic, version ≠ 1.0, nonzero reserved words, `code_size` not a multiple of 4 or > 16 MiB, `data_size` > 1024, entry not 4-aligned or not inside code, file length ≠ header + code + data, `malloc` failure.
+
+The engine still never `fopen`s. Only the launcher does.
+
+---
+
+## 12. Safety checklist (enforced in `vm.c`)
 
 - [x] No fetch past `code_len`; subtraction form, not `ip + 4` overflow
 - [x] No `ram[i]` with `i >= 1024`
@@ -189,7 +221,7 @@ Worked values: ISA §9. `tests/smoke.c` encodes the `2+3` program the same way.
 
 ---
 
-## 12. Adding an opcode
+## 13. Adding an opcode
 
 1. `#define OP_…` in `opcodes.h`
 2. `case OP_…:` in the `switch` in `src/vm.c` with the same bound checks as neighbouring ops

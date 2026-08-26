@@ -1,6 +1,6 @@
 # ALIF Instruction Set Architecture
 
-**Status:** numeric contract in `include/opcodes.h`. Execution engine in `src/vm.c` (`struct alif_vm` in `include/alif.h`). Semantic rules here match that interpreter.
+**Status:** numeric contract in `include/opcodes.h`. Execution engine in `src/vm.c`. `.afbin` loader in `src/load.c`. Host launcher binary **`alif`** in `src/alif.c`. Semantic rules here match that interpreter.
 
 **Machine class:** 32-bit, register-register (load/store), **Harvard v1** (bytecode payload ≠ data RAM), in-order fetch-execute.
 
@@ -547,15 +547,18 @@ HLT               0xFF000000
 
 ---
 
-## 10. How a program is presented (v1 engine)
+## 10. How a program is presented
 
-The running interpreter does **not** load a container file. Callers pass a raw bytecode payload:
+### 10.1 In-memory API
+
+Callers may still pass a raw bytecode payload to the engine:
 
 ```c
 struct alif_vm vm;
 unsigned char payload[] = { /* LE instruction words */ };
 alif_vm_init(&vm);
-alif_exec(&vm, payload, sizeof payload);
+alif_exec(&vm, payload, sizeof payload);           /* IP = 0 */
+alif_exec_from(&vm, payload, sizeof payload, entry); /* IP = entry */
 ```
 
 | Region | Size | Pointer | Notes |
@@ -564,23 +567,50 @@ alif_exec(&vm, payload, sizeof payload);
 | RAM | 1024 bytes | `vm.ram[]` | data + stack; `SP` starts at 1024 |
 | Registers | 8 × `int` | `vm.regs[]` | `regs[R1]` is the first GPR |
 
-A future on-disk `.alif` image (not required to run `alif_exec`) can still be:
+### 10.2 On-disk `.afbin` image (launcher `alif`)
+
+A complete ALIF program **is** a `.afbin` file. Programmers write one (hex editor, or `alif_write_afbin`); a future compiler’s only object format is `.afbin`. `alif.exe` / `alif` loads that file and runs the VM. There is no second source format.
+
+Worked images (with a byte-level map): `examples/add.afbin`, `examples/hello.afbin`, [`examples/README.md`](../examples/README.md).
+
+The `alif` binary (`src/alif.c` + `src/load.c`) reads a **version-1.0** image. Extension is `.afbin` (required by the launcher, any case). Magic is the four ASCII bytes `A L I F` (not NUL-terminated). All multi-byte header fields are **little-endian**. File length must equal `32 + code_size + data_size` exactly (no padding, no trailing bytes).
 
 ```
 Offset   Size     Field
 0x00     4        magic  'A' 'L' 'I' 'F'
-0x04     2        version major (1)
-0x06     2        version minor (0)
-0x08     4        entry IP (byte offset into code, 4-aligned)
-0x0C     4        code size in bytes (multiple of 4)
-0x10     4        data size in bytes (multiple of 4, copied into RAM)
-0x14     4        reserved (stack is always the top of the 1 KiB RAM)
-0x18     8        reserved zeros
-0x20     code     instruction stream  →  alif_exec payload
-+code    data     initialized RAM bytes (must fit in 1024 with stack)
+0x04     2        version major = 1
+0x06     2        version minor = 0
+0x08     4        entry IP (byte offset into the code section, 4-aligned)
+0x0C     4        code size in bytes (multiple of 4, at least 4, ≤ 16 MiB)
+0x10     4        data size in bytes (multiple of 4, ≤ 1024)
+0x14     4        reserved, must be 0
+0x18     8        reserved, must be 0
+0x20     code     instruction stream → `alif_exec_from` payload
++code    data     copied to `vm.ram[0 .. data_size)` before run
 ```
 
-Loader rule: data size + stack room ≤ 1024. v1 stack is the whole RAM unless data is pre-stored at low addresses by the caller before `alif_exec`.
+Loader steps:
+
+1. Require the path to end in `.afbin` (any case).
+2. Open the file (`rb`), reject anything smaller than 32 bytes.
+3. Check magic, version `1.0`, reserved zeros, sizes, and entry.
+4. `malloc` the code section; copy data into `struct alif_image`.
+5. `alif_vm_init`; `memcpy` data into `vm.ram` if `data_size > 0`.
+6. `alif_exec_from(vm, code, code_size, entry)`.
+7. Free the code buffer.
+
+`code_size` is **not** capped at 1 KiB. The 1 KiB cap is RAM only. J-type `imm24` can still only name the first 16 MiB of the payload, which is also the loader’s max `code_size`.
+
+```
+alif program.afbin
+```
+
+| `alif` exit | Meaning |
+|---|---|
+| 0 | `HLT`, or `TRAP` with imm16 0 |
+| 1 | usage, I/O, or format error (message on stderr) |
+| 2 | VM fault (`ILL`/`ALIGN`/`MEM`/…); `ip` printed on stderr |
+| 1–255 | `TRAP` imm16 when nonzero (host exit status) |
 
 ---
 
@@ -591,7 +621,7 @@ Loader rule: data size + stack room ≤ 1024. v1 stack is the whole RAM unless d
 | `R0` wired to zero | 8 named GPRs were required; a zero reg would be a 9th id | use `MOVI rd, 0` |
 | IP-relative branches | keeps J-type decode a pure immediate | `0x7_` class |
 | Register-indirect jump | 24-bit abs offsets cover small payloads | `OP_JMPR` on `0x5B` |
-| Unified code/data map | 1 KiB RAM + separate payload is simpler to bound | optional loader |
+| Unified code/data map | 1 KiB RAM + separate payload is simpler to bound | optional later |
 | `MOVHI` / 32-bit load immediate | 16-bit `MOVI` is enough to bootstrap | `0x06` |
 | Unsigned `Jcc` on CF | signed set is enough for first compiler | `0x5C`..`0x5F` |
 | Byte/halfword load-store | word machine first | `0x07`..`0x0A` |
@@ -605,6 +635,8 @@ Loader rule: data size + stack room ≤ 1024. v1 stack is the whole RAM unless d
 |---|---|
 | Opcode numbers, register ids, field shifts, flag bits | `include/opcodes.h` |
 | Machine struct, RAM size, fault macros, `alif_exec` | `include/alif.h` |
+| `.afbin` header, `alif_load_afbin` / `alif_write_afbin` | `include/alf.h`, `src/load.c` |
+| Launcher CLI | `src/alif.c` (binary: `alif`) |
 | Fetch-decode-execute loop and bounds checks | `src/vm.c` |
 | Behaviour, Harvard split, I/O ports, encoding examples | this file |
 | How the C loop is structured | `docs/IMPLEMENTATION.md` |
