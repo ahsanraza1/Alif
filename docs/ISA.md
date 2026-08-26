@@ -1,10 +1,10 @@
 # ALIF Instruction Set Architecture
 
-**Status:** frozen numeric contract in `include/opcodes.h`. Semantic rules in this document are the intended machine behaviour for the first interpreter.
+**Status:** numeric contract in `include/opcodes.h`. Execution engine in `src/vm.c` (`struct alif_vm` in `include/alif.h`). Semantic rules here match that interpreter.
 
-**Machine class:** 32-bit, register-register (load/store), single address space, in-order fetch-execute.
+**Machine class:** 32-bit, register-register (load/store), **Harvard v1** (bytecode payload ≠ data RAM), in-order fetch-execute.
 
-This document is the architect’s contract. If C code and this file disagree on a *number*, `opcodes.h` wins. If they disagree on *behaviour*, this file wins until the header is updated in the same change.
+This document is the architect’s contract. If C code and this file disagree on a *number*, `opcodes.h` wins. If they disagree on *behaviour*, this file wins until the header **and** `src/vm.c` are updated in the same change.
 
 ---
 
@@ -24,11 +24,16 @@ Non-goals for v1: privilege rings, virtual memory, floating point, atomics, dela
 
 | State | Width | Addressable? | Reset |
 |---|---|---|---|
-| `R1`..`R8` | 32 bits each | yes, via `rd`/`rs1`/`rs2` | `0` |
-| `PC` | 32 bits | no (updated by sequential fetch and jumps) | entry point of the image |
-| `SP` | 32 bits | no (used only by `PUSH`/`POP`/`CALL`/`RET`) | top of stack region |
+| `R1`..`R8` | 32-bit `int` each | yes, via `rd`/`rs1`/`rs2` | `0` |
+| `IP` | 32 bits | no (byte index into the **bytecode payload**) | `0` (start of payload) |
+| `SP` | 32 bits | no (byte address in **RAM only**) | `ALIF_RAM_SIZE` (1024) |
 | `FLAGS` | 32 bits, 4 defined | no (written by arithmetic/compare, read by `Jcc`) | `0` |
-| Memory | byte-addressable, word-accessed | yes, via `LOAD`/`STORE`/stack | image + zeros |
+| RAM | 1024 bytes | yes, via `LOAD`/`STORE`/stack | all zeros |
+| Bytecode | `unsigned char[]` | execute-only; IP fetches 4 LE bytes per insn | caller-supplied |
+
+v1 is **Harvard**: the instruction pointer never reads `ram[]`, and `LOAD`/`STORE` never read the bytecode payload. A future image loader may copy code into a larger unified map; the opcode encodings will not change.
+
+The engine field is named `ip` (instruction pointer). Older notes called this `PC`; they are the same register.
 
 There is **no `R0`**. The eight GPRs are named `R1`..`R8` and encoded as **0..7**. The name is 1-based for humans; the encoding is 0-based so a 3-bit field packs tightly.
 
@@ -39,7 +44,7 @@ Encoding:      0   1   2   3   4   5   6   7
 
 A 4-bit register field (`REG_MASK = 0xF`) is reserved. Encodings `8`..`15` are **illegal**. An interpreter must trap (see §8) rather than silently alias them onto `R1`..`R8`.
 
-`PC`, `SP`, and `FLAGS` are architectural but **not** in the register field. Software cannot `MOV` into `PC`. To change control flow, use the `0x5_` class. To change `SP`, the only v1 operations are stack instructions (they adjust `SP` themselves).
+`IP`, `SP`, and `FLAGS` are architectural but **not** in the register field. Software cannot `MOV` into `IP`. To change control flow, use the `0x5_` class. To change `SP`, the only v1 operations are stack instructions (they adjust `SP` themselves).
 
 Suggested software convention (not enforced by hardware):
 
@@ -55,12 +60,12 @@ Suggested software convention (not enforced by hardware):
 
 ## 3. Data representation
 
-- Integers are **32-bit two’s complement**.
+- Integers are **32-bit two’s complement**, stored in the engine as `int regs[8]`.
 - All GPR arithmetic wraps mod 2³².
-- Memory is **byte-addressable**. The address space is a 32-bit unsigned integer.
-- The unit of `LOAD`/`STORE`/`PUSH`/`POP` is one **little-endian 32-bit word**.
-- Instruction words in memory are also **little-endian 32-bit words**.
-- Bit diagrams in this document number bits the architectural way: bit 31 is the MSB of the word, bit 0 is the LSB. That numbering is independent of byte order on disk.
+- **RAM** is 1024 bytes (`ALIF_RAM_SIZE`), byte-addressable, addresses `0`..`1023`. The unit of `LOAD`/`STORE`/`PUSH`/`POP` is one **little-endian 32-bit word** entirely inside that block (last legal address `1020`).
+- **Bytecode** is a caller-owned `unsigned char` array. Each instruction is four little-endian bytes. `IP` is a byte offset into that array, not into RAM.
+- Address math for RAM uses signed 12-bit displacement plus the unsigned base in `rs1`. The engine evaluates the sum in 64 bits so a wrap cannot land back inside the 1 KiB window.
+- Bit diagrams in this document number bits the architectural way: bit 31 is the MSB of the word, bit 0 is the LSB. That numbering is independent of byte order in the payload.
 
 Sign-extension rules for immediates:
 
@@ -70,7 +75,7 @@ Sign-extension rules for immediates:
 | `imm16` | 16 | signed for `ADDI`/`SUBI`/`CMPI` | **zero-extended** for `MOVI`; **unsigned port** for `IN`/`OUT`; **unsigned trap code** for `TRAP` |
 | `imm24` | 24 | — | **unsigned byte address** of the target instruction; must be 4-byte aligned |
 
-`imm24` is an **absolute** address, not PC-relative. PC-relative jumps can be added later in unused opcode space (`0x7_`) without breaking this encoding.
+`imm24` is an **absolute byte offset into the bytecode payload**, not IP-relative and not a RAM address. IP-relative jumps can be added later in unused opcode space (`0x7_`) without breaking this encoding. The payload may be larger than 1 KiB; only jumps are limited to 24-bit offsets (`0`..`0xFFFFFF`). The 1 KiB cap applies to **RAM**, not to code size.
 
 ---
 
@@ -212,15 +217,16 @@ Notation:
 
 - `R[rd]` — GPR selected by the `rd` field (must be 0..7).
 - `sext12(x)` / `sext16(x)` — sign-extend to 32 bits.
-- `mem32[addr]` — little-endian 32-bit word at byte address `addr`. `addr` must be 4-byte aligned.
-- After every instruction that does not write `PC`, `PC <- PC + 4`.
-- Jump instructions that **do not** take the branch still fall through (`PC + 4`).
+- `mem32[addr]` — little-endian 32-bit word at **RAM** byte address `addr`. `addr` must be 4-byte aligned and `addr+3 < 1024`.
+- After every instruction that does not write `IP`, `IP <- IP + 4`.
+- Jump instructions that **do not** take the branch still fall through (`IP + 4`).
+- Fetch: if `IP` is unaligned, or `IP+4` would run past `code_len`, the engine faults **before** reading. It never indexes `code[code_len]` or `ram[1024]`.
 
 ### 7.1 Data movement — `0x0_`
 
 #### `OP_NOP` `0x00` — R-type (all fields 0)
 
-No operation. `PC <- PC + 4`. FLAGS unchanged.
+No operation. `IP <- IP + 4`. FLAGS unchanged.
 
 #### `OP_MOV` `0x01` — R-type
 
@@ -360,21 +366,21 @@ FLAGS from `R[rs1] & R[rs2]`. `rd` must be 0.
 
 ### 7.6 Control flow — `0x5_`
 
-All targets are **absolute byte addresses**. `imm24` is the low 24 bits of `PC` after the jump, zero-extended to 32 bits. This limits a v1 executable to the first 16 MiB of the address space (`0x000000`..`0xFFFFFF`). Larger images need a register-indirect jump (reserved).
+All targets are **absolute byte offsets into the bytecode payload**. `imm24` is the value written to `IP` when the branch is taken. Payload size is not capped at 16 MiB, but a J-type can only name the first 16 MiB of the payload. RAM stays 1 KiB regardless of payload length.
 
-Target must be 4-byte aligned. Unaligned target → alignment fault **whether or not** a conditional branch is taken? **No:** the alignment check runs only when the branch is taken (or on `JMP`/`CALL`, which always take).
+Target must be 4-byte aligned **and** `target + 4 <= code_len`. Unaligned or out-of-payload targets fault. The alignment/range check runs only when the branch is taken (or on `JMP`/`CALL`/`RET`, which always take).
 
 #### `OP_JMP` `0x50` — J-type
 
-`PC <- imm24`
+`IP <- imm24`
 
 #### `OP_JZ` `0x51` / `OP_JE` `0x53`
 
-If `ZF`: `PC <- imm24`, else `PC <- PC + 4`.
+If `ZF`: `IP <- imm24`, else `IP <- IP + 4`.
 
 #### `OP_JNZ` `0x52` / `OP_JNE` `0x54`
 
-If `!ZF`: `PC <- imm24`, else fall through.
+If `!ZF`: `IP <- imm24`, else fall through.
 
 #### `OP_JL` `0x55` / `OP_JLE` `0x56` / `OP_JG` `0x57` / `OP_JGE` `0x58`
 
@@ -384,26 +390,28 @@ Conditions in §6.
 
 ```
 SP <- SP - 4
-mem32[SP] <- PC + 4          # return address
-PC <- imm24
+ram32[SP] <- IP + 4          # return address (payload offset)
+IP <- imm24
 ```
 
-If `SP` would become unaligned or out of stack range → stack fault. `CALL` does not write FLAGS.
+If `SP` would become unaligned or leave `0..1023`, → stack fault. `CALL` does not write FLAGS.
 
 #### `OP_RET` `0x5A` — J-type, `imm24 = 0`
 
 ```
-PC <- mem32[SP]
+IP <- ram32[SP]
 SP <- SP + 4
 ```
 
+The popped value is checked as a jump target (`jump_ok`) before it is written to `IP`.
+
 ### 7.7 Stack — `0x6_`
 
-The stack grows **down** (toward lower addresses). `SP` points at the **last occupied** word after `PUSH`, and at the next free word? **v1 rule:** `SP` points at the last occupied word.
+The stack lives in **RAM**, grows **down** (toward lower addresses). After `alif_vm_init`, `SP = 1024` (empty: one past the last RAM byte). After `PUSH`, `SP` points at the last occupied word.
 
 ```
-PUSH:  SP <- SP - 4;  mem32[SP] <- R[rs1]
-POP:   R[rd] <- mem32[SP];  SP <- SP + 4
+PUSH:  SP <- SP - 4;  ram32[SP] <- R[rs1]
+POP:   R[rd] <- ram32[SP];  SP <- SP + 4
 ```
 
 `PUSH` uses `rs1` (source). `POP` uses `rd` (destination). Unused register fields must be 0. FLAGS unchanged.
@@ -444,24 +452,26 @@ v1 interpreter behaviour: treat as a **controlled halt** that reports `imm16` to
 
 #### `OP_HLT` `0xFF` — R-type, all fields 0
 
-Stop fetch-execute. `PC` is left at the `HLT` instruction (not advanced). Exit status 0 to the host unless a previous fault occurred.
+Stop fetch-execute. `IP` is left at the `HLT` instruction (not advanced). `alif_exec` returns `ALIF_OK`. Same freeze-on-instruction behaviour for `TRAP`.
 
 ---
 
 ## 8. Faults
 
-A fault stops the machine. The interpreter should report `PC` of the faulting instruction, a fault code, and dump GPRs.
+A fault stops the machine. `alif_exec` returns the fault code; `vm->ip` is the faulting instruction (the word just fetched). `vm->fault` holds the same code.
 
-| Code | Name | Cause |
+| Code | Macro | Cause |
 |---|---|---|
-| 1 | `FAULT_ILL` | unknown opcode, illegal register id 8..15, reserved field not zero (optional in v1; recommended) |
-| 2 | `FAULT_ALIGN` | `PC`, `LOAD`/`STORE`/`PUSH`/`POP`/`CALL`/`RET` address not multiple of 4 |
-| 3 | `FAULT_MEM` | address outside the allocated image + heap/stack |
-| 4 | `FAULT_DIV0` | `DIV`/`MOD` with `rs2 == 0` |
-| 5 | `FAULT_STK` | stack overflow / underflow |
-| 6 | `FAULT_IO` | unbound I/O port |
+| 0 | `ALIF_OK` | `HLT` or `TRAP` (not a fault) |
+| 1 | `ALIF_FAULT_ILL` | unknown opcode, register id 8..15, `vm == NULL` |
+| 2 | `ALIF_FAULT_ALIGN` | `IP` or RAM address not multiple of 4 |
+| 3 | `ALIF_FAULT_MEM` | `IP` fetch past `code_len`, RAM address outside `0..1020`, NULL/short payload, `IP+4` wrap |
+| 4 | `ALIF_FAULT_DIV0` | `DIV`/`MOD` with `rs2 == 0` |
+| 5 | `ALIF_FAULT_STK` | stack overflow / underflow (`SP` would leave RAM) |
+| 6 | `ALIF_FAULT_IO` | unbound I/O port |
+| 7 | `ALIF_FAULT_STEP` | more than `ALIF_MAX_STEPS` (1 000 000) instructions — infinite-loop guard |
 
-Faults do not run user-mode handlers in v1.
+Faults do not run user-mode handlers in v1. The engine returns immediately; it does not keep fetching.
 
 ---
 
@@ -537,36 +547,40 @@ HLT               0xFF000000
 
 ---
 
-## 10. Binary program image (v1)
+## 10. How a program is presented (v1 engine)
 
-Not yet implemented; this is the intended layout so assembler and interpreter stay aligned.
+The running interpreter does **not** load a container file. Callers pass a raw bytecode payload:
+
+```c
+struct alif_vm vm;
+unsigned char payload[] = { /* LE instruction words */ };
+alif_vm_init(&vm);
+alif_exec(&vm, payload, sizeof payload);
+```
+
+| Region | Size | Pointer | Notes |
+|---|---|---|---|
+| Bytecode | `code_len` bytes | caller’s `const unsigned char *` | read-only; `IP` indexes here |
+| RAM | 1024 bytes | `vm.ram[]` | data + stack; `SP` starts at 1024 |
+| Registers | 8 × `int` | `vm.regs[]` | `regs[R1]` is the first GPR |
+
+A future on-disk `.alif` image (not required to run `alif_exec`) can still be:
 
 ```
 Offset   Size     Field
-0x00     4        magic  'A' 'L' 'I' 'F'  (0x414C4946 big-endian ASCII;
-                                           stored LE on disk as 46 49 4C 41)
+0x00     4        magic  'A' 'L' 'I' 'F'
 0x04     2        version major (1)
 0x06     2        version minor (0)
-0x08     4        entry PC (byte address, 4-aligned)
+0x08     4        entry IP (byte offset into code, 4-aligned)
 0x0C     4        code size in bytes (multiple of 4)
-0x10     4        data size in bytes (multiple of 4)
-0x14     4        stack size in bytes (multiple of 4, default 65536)
+0x10     4        data size in bytes (multiple of 4, copied into RAM)
+0x14     4        reserved (stack is always the top of the 1 KiB RAM)
 0x18     8        reserved zeros
-0x20     code     instruction stream
-+code    data     initialized data
+0x20     code     instruction stream  →  alif_exec payload
++code    data     initialized RAM bytes (must fit in 1024 with stack)
 ```
 
-Load-time memory map (byte addresses inside the VM):
-
-```
-0x00000000  code
-code_end    data
-data_end    zero-filled heap (optional, size TBD)
-high mem    stack: SP_reset = stack_base + stack_size   (empty stack;
-            first PUSH writes at SP_reset - 4)
-```
-
-`imm24` jumps must land inside `code`. `LOAD`/`STORE` may target data and stack. Executing out of data is a `FAULT_ILL` or `FAULT_MEM` (implementer’s choice; pick one and keep it).
+Loader rule: data size + stack room ≤ 1024. v1 stack is the whole RAM unless data is pre-stored at low addresses by the caller before `alif_exec`.
 
 ---
 
@@ -575,8 +589,9 @@ high mem    stack: SP_reset = stack_base + stack_size   (empty stack;
 | Missing | Why | Likely home later |
 |---|---|---|
 | `R0` wired to zero | 8 named GPRs were required; a zero reg would be a 9th id | use `MOVI rd, 0` |
-| PC-relative branches | keeps J-type decode a pure immediate | `0x7_` class |
-| Register-indirect jump | 16 MiB abs is enough for v1 | `OP_JMPR` on `0x5B` |
+| IP-relative branches | keeps J-type decode a pure immediate | `0x7_` class |
+| Register-indirect jump | 24-bit abs offsets cover small payloads | `OP_JMPR` on `0x5B` |
+| Unified code/data map | 1 KiB RAM + separate payload is simpler to bound | optional loader |
 | `MOVHI` / 32-bit load immediate | 16-bit `MOVI` is enough to bootstrap | `0x06` |
 | Unsigned `Jcc` on CF | signed set is enough for first compiler | `0x5C`..`0x5F` |
 | Byte/halfword load-store | word machine first | `0x07`..`0x0A` |
@@ -589,7 +604,9 @@ high mem    stack: SP_reset = stack_base + stack_size   (empty stack;
 | Item | Lives in |
 |---|---|
 | Opcode numbers, register ids, field shifts, flag bits | `include/opcodes.h` |
-| Behaviour, faults, image format, I/O ports | this file |
-| Decode loop, host binding, endian helpers | `docs/IMPLEMENTATION.md` |
+| Machine struct, RAM size, fault macros, `alif_exec` | `include/alif.h` |
+| Fetch-decode-execute loop and bounds checks | `src/vm.c` |
+| Behaviour, Harvard split, I/O ports, encoding examples | this file |
+| How the C loop is structured | `docs/IMPLEMENTATION.md` |
 
-When adding an opcode: assign the number in `opcodes.h`, add a row to §5 and a subsection to §7 in the same commit.
+When adding an opcode: assign the number in `opcodes.h`, implement a `case` in `src/vm.c`, add a row to §5 and a subsection to §7 **in the same change**.

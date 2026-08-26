@@ -6,7 +6,9 @@
  *
  * Canonical documentation:
  *   docs/ISA.md              instruction set, encodings, semantics
- *   docs/IMPLEMENTATION.md   decoder, memory, flags, binary image
+ *   docs/IMPLEMENTATION.md   execution engine, bounds checks, memory
+ *   include/alif.h           machine state (regs, 1 KiB RAM, IP)
+ *   src/vm.c                 fetch-decode-execute loop
  *   README.md                project index
  *
  * Instruction word (MSB = bit 31). Three overlays of the same 32 bits:
@@ -88,17 +90,17 @@
 #define OP_TEST                 0x42    /* flags = rs1 & rs2            */
 
 /* 0x5_  control flow */
-#define OP_JMP                  0x50    /* pc = imm24                   */
-#define OP_JZ                   0x51    /* if ZF  pc = imm24            */
-#define OP_JNZ                  0x52    /* if !ZF pc = imm24            */
-#define OP_JE                   0x53    /* if ZF  pc = imm24            */
-#define OP_JNE                  0x54    /* if !ZF pc = imm24            */
-#define OP_JL                   0x55    /* if SF!=OF pc = imm24         */
+#define OP_JMP                  0x50    /* ip = imm24                   */
+#define OP_JZ                   0x51    /* if ZF  ip = imm24            */
+#define OP_JNZ                  0x52    /* if !ZF ip = imm24            */
+#define OP_JE                   0x53    /* if ZF  ip = imm24            */
+#define OP_JNE                  0x54    /* if !ZF ip = imm24            */
+#define OP_JL                   0x55    /* if SF!=OF ip = imm24         */
 #define OP_JLE                  0x56    /* if ZF | (SF!=OF)             */
 #define OP_JG                   0x57    /* if !ZF & (SF==OF)            */
 #define OP_JGE                  0x58    /* if SF==OF                    */
-#define OP_CALL                 0x59    /* push pc; pc = imm24          */
-#define OP_RET                  0x5A    /* pc = pop()                   */
+#define OP_CALL                 0x59    /* push ip+4; ip = imm24        */
+#define OP_RET                  0x5A    /* ip = pop()                   */
 
 /* 0x6_  stack */
 #define OP_PUSH                 0x60    /* mem[--sp] = rs1              */
