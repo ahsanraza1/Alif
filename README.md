@@ -15,6 +15,7 @@ ALIF is a custom **register-based virtual machine** written in pure C. The machi
 | [`src/load.c`](src/load.c) | C sources | `.afbin` file I/O |
 | [`src/alif.c`](src/alif.c) | C sources | Launcher (`alif`) — runs `.afbin` only |
 | [`afas/`](afas/) | optional assembler | **`afas`**: `.afb` assembly → `.afbin` |
+| [`af8/`](af8/) | future compiler encoding | **AF8**: 8-bit Urdu codes for `.alif` source (not used by the VM) |
 | [`examples/`](examples/) | programs | `.afb` sources and `.afbin` images |
 | [`tests/smoke.c`](tests/smoke.c) | bring-up | ALU, RAM, and fault-class checks |
 
@@ -109,3 +110,8 @@ int rc = alif_exec(&vm, code, sizeof code);
 - **Hidden state:** `IP`, `SP`, `FLAGS` — not addressable as GPRs.
 
 Do not invent parallel enum wrappers for opcodes. Include `opcodes.h`.
+
+## Planned source language (not built)
+
+Urdu `.alif` files will use **AF8**, a private 8-bit page: ASCII `0x00–0x7F` unchanged, Urdu letters in `0x80–0xAA` (one letter = one byte). Analysis and tables: [`af8/README.md`](af8/README.md). The compiler will emit `.afb`; `afas` and `alif` stay as they are.
+
