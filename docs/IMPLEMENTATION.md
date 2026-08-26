@@ -17,8 +17,9 @@ examples/*.afbin     programs (the only files alif runs)
 examples/*.afb       optional assembly; assembled by afas, not by alif
 afas/afas.c          optional assembler (.afb → .afbin)
 afas/README.md       assembly language
-af8/                 AF8 8-bit Urdu page for future .alif compiler (VM-independent)
-lang/                علیف language grammar and keyword bytes (no compiler yet)
+af8/                 AF8 8-bit Urdu page for .alif (VM-independent)
+lang/                علیف language grammar and keyword bytes
+alifc/               compiler .alif → .afb (does not run the VM)
 tests/smoke.c        bring-up: ALU, RAM, and every fault class
 tests/mk_examples.c  writes examples/add.afbin and examples/hello.afbin
 build.bat            gcc build on Windows (no make)
@@ -29,9 +30,10 @@ Makefile             optional, if you have GNU make
 Build (from the repo root). **gcc is enough; make is optional.**
 
 ```
-build.bat           # alif.exe + afas\afas.exe
+build.bat           # alif.exe + afas\afas.exe + alifc\alifc.exe
 build.bat alif      # launcher only
 build.bat afas      # assembler only
+build.bat alifc     # compiler only
 ```
 
 Same commands without the script:
@@ -39,10 +41,11 @@ Same commands without the script:
 ```
 gcc -std=c11 -Wall -Wextra -Werror -I include -o alif.exe src/alif.c src/load.c src/vm.c
 gcc -std=c11 -Wall -Wextra -Werror -I include -o afas/afas.exe afas/afas.c src/load.c
+gcc -std=c11 -Wall -Wextra -Werror -o alifc/alifc.exe alifc/alifc.c
 gcc -std=c11 -Wall -Wextra -Werror -I include -o tests/smoke.exe tests/smoke.c src/vm.c
 ```
 
-`opcodes.h` stays **defines only**. The engine is ordinary C in `vm.c`. The launcher is the only program that talks to the filesystem.
+`opcodes.h` stays **defines only**. The engine is ordinary C in `vm.c`. Each tool talks only to its own files: `alif` to `.afbin`, `afas` to `.afb`/`.afbin`, `alifc` to `.alif`/`.afb`.
 
 ---
 

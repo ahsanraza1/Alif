@@ -20,7 +20,7 @@ VM
 
 | File | What it does | Assemble | Run |
 |---|---|---|---|
-| [`add.afb`](add.afb) / [`add.afbin`](add.afbin) | `R1 = 2 + 3`, print `5` | `afas\afas.exe examples/add.afb` | `alif.exe examples/add.afbin` |
+| [`add.afb`](add.afb) / [`add.afbin`](add.afbin) | `R1 = 2 + 6`, print `8` | `afas\afas.exe examples/add.afb` | `alif.exe examples/add.afbin` |
 | [`hello.afb`](hello.afb) / [`hello.afbin`](hello.afbin) | write `ALIF` | `afas\afas.exe examples/hello.afb` | `alif.exe examples/hello.afbin` |
 | [`branch.afb`](branch.afb) | `CMP` / `JE` with a label | `afas\afas.exe examples/branch.afb` | `alif.exe examples/branch.afbin` |
 

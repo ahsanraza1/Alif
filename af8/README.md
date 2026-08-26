@@ -2,12 +2,10 @@
 
 This folder is **not** part of the VM. `alif.exe`, `afas`, and `src/vm.c` stay ASCII/binary as they are.
 
-Later:
-
 ```
-programmer writes Urdu  →  file.alif  (AF8 bytes)
+programmer writes Urdu  →  file.alif  (UTF-8 or AF8)
         |
-        |  future compiler (not built yet)
+        |  alifc
         v
      file.afb           (existing assembler language)
         |
@@ -184,15 +182,14 @@ Each of those is still one `unsigned char`.
 | File | Role |
 |---|---|
 | [`af8.h`](af8.h) | numeric contract (`#define` only + classifiers) |
-| [`af8_map.h`](af8_map.h) | Unicode → AF8 table for a future UTF-8 front end |
+| [`af8_map.h`](af8_map.h) | Unicode → AF8 table |
+| [`af8_utf8.h`](af8_utf8.h) | UTF-8 detect / decode / transcode to AF8 |
 | this README | analysis and assignment |
 
-The future compiler includes `af8.h` and lexes `unsigned char`. It emits **`.afb`** (existing assembly). It must not call the VM.
+**`alifc`** includes these headers. It accepts UTF-8 or AF8 `.alif`, lexes AF8, and emits **`.afb`**. It does not call the VM.
 
 ---
 
 ## 6. Next (not done)
 
-1. Language grammar — **`lang/`** (علیف v1).
-2. Compiler: `.alif` (AF8) → `.afb`.
-3. Optional UTF-8 → AF8 filter / editor display using `af8_map.h`.
+1. A standalone UTF-8 ↔ AF8 filter if you want AF8 on disk without going through `alifc`.

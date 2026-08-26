@@ -7,6 +7,7 @@ set CFLAGS=-std=c11 -Wall -Wextra -Werror -I include
 
 if /I "%1"=="afas" goto afas
 if /I "%1"=="alif" goto alif
+if /I "%1"=="alifc" goto alifc
 if /I "%1"=="smoke" goto smoke
 
 :alif
@@ -18,6 +19,12 @@ if /I "%1"=="alif" goto done
 :afas
 echo gcc -o afas\afas.exe
 gcc %CFLAGS% -o afas\afas.exe afas\afas.c src\load.c
+if errorlevel 1 exit /b 1
+if /I "%1"=="afas" goto done
+
+:alifc
+echo gcc -o alifc\alifc.exe
+gcc -std=c11 -Wall -Wextra -Werror -o alifc\alifc.exe alifc\alifc.c
 if errorlevel 1 exit /b 1
 goto done
 

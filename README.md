@@ -14,9 +14,10 @@ ALIF is a custom **register-based virtual machine** written in pure C. The machi
 | [`src/vm.c`](src/vm.c) | C sources | Execution engine |
 | [`src/load.c`](src/load.c) | C sources | `.afbin` file I/O |
 | [`src/alif.c`](src/alif.c) | C sources | Launcher (`alif`) — runs `.afbin` only |
-| [`afas/`](afas/) | optional assembler | **`afas`**: `.afb` assembly → `.afbin` |
-| [`af8/`](af8/) | future compiler encoding | **AF8**: 8-bit Urdu codes for `.alif` source (not used by the VM) |
-| [`lang/`](lang/) | source language | **علیف** grammar; compiler not built yet |
+| [`afas/`](afas/) | optional assembler | **`afas`**: `.afb` → `.afbin` |
+| [`alifc/`](alifc/) | optional compiler | **`alifc`**: `.alif` (UTF-8 or AF8) → `.afb` |
+| [`af8/`](af8/) | compiler encoding | **AF8**: 8-bit Urdu codes for `.alif` source (not used by the VM) |
+| [`lang/`](lang/) | source language | **علیف** grammar (`alifc` compiles it) |
 | [`examples/`](examples/) | programs | `.afb` sources and `.afbin` images |
 | [`tests/smoke.c`](tests/smoke.c) | bring-up | ALU, RAM, and fault-class checks |
 
@@ -28,11 +29,12 @@ You need **gcc**. You do **not** need `make`. From the repo root:
 build.bat
 ```
 
-That produces `alif.exe` and `afas\afas.exe`. Same thing by hand:
+That produces `alif.exe`, `afas\afas.exe`, and `alifc\alifc.exe`. Same thing by hand:
 
 ```
 gcc -std=c11 -Wall -Wextra -Werror -I include -o alif.exe src/alif.c src/load.c src/vm.c
 gcc -std=c11 -Wall -Wextra -Werror -I include -o afas/afas.exe afas/afas.c src/load.c
+gcc -std=c11 -Wall -Wextra -Werror -o alifc/alifc.exe alifc/alifc.c
 ```
 
 Only the VM launcher:
@@ -47,26 +49,33 @@ Only the assembler:
 build.bat afas
 ```
 
+Only the compiler:
+
+```
+build.bat alifc
+```
+
 Then:
 
 ```
 alif.exe examples/add.afbin
 ```
 
-Assemble source, then run (two separate programs):
+Urdu source → assembly → binary → VM (three programs):
 
 ```
-afas\afas.exe examples/add.afb
-alif.exe examples/add.afbin
+alifc\alifc.exe alifc\samples\add.alif
+afas\afas.exe alifc\samples\add.afb
+alif.exe alifc\samples\add.afbin
 ```
 
 ```
-programmer  →  program.afb  →  afas.exe  →  program.afbin  →  alif.exe  →  VM
+programmer  →  .alif  →  alifc  →  .afb  →  afas  →  .afbin  →  alif.exe  →  VM
 ```
 
-`examples/add.afbin` prints `5`. `examples/hello.afbin` prints `ALIF`. Assembly language: [`afas/README.md`](afas/README.md). Binary layout: [`examples/README.md`](examples/README.md).
+`examples/add.afbin` prints `8` (`2 + 6`). `alifc\samples\add.afbin` prints the same from Urdu source. `examples/hello.afbin` prints `ALIF`. Assembly language: [`afas/README.md`](afas/README.md). Binary layout: [`examples/README.md`](examples/README.md).
 
-**`alif` pipeline:** `.afbin` → VM. **`afas` pipeline (optional):** `.afb` → `.afbin`. `alif` never reads `.afb`.
+**`alif` pipeline:** `.afbin` → VM. **`afas`:** `.afb` → `.afbin`. **`alifc`:** `.alif` → `.afb`. Each tool is optional for the others.
 
 A `Makefile` is in the tree for people who have GNU make. It is not required.
 
@@ -112,7 +121,7 @@ int rc = alif_exec(&vm, code, sizeof code);
 
 Do not invent parallel enum wrappers for opcodes. Include `opcodes.h`.
 
-## Planned source language (not built)
+## Source language
 
-**علیف** (`lang/`): Urdu keywords, ASCII operators, `.alif` files as **AF8** bytes. Grammar: [`lang/README.md`](lang/README.md). Encoding: [`af8/README.md`](af8/README.md). A future compiler will emit `.afb`; `afas` and `alif` stay as they are. No editor transcoder in this phase.
+**علیف** (`lang/`): Urdu keywords, ASCII operators. Write `.alif` as **UTF-8** in an editor (`alifc` transcodes to AF8). Grammar: [`lang/README.md`](lang/README.md). Encoding: [`af8/README.md`](af8/README.md). Compiler **`alifc`**: `.alif` → `.afb` ([`alifc/README.md`](alifc/README.md)). Then `afas` and `alif` as before.
 

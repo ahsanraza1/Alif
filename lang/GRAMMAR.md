@@ -2,7 +2,7 @@
 
 Human-readable grammar is in [`README.md`](README.md). This page is the **token contract** for a lexer: what bytes form a keyword vs an identifier.
 
-On-disk `.alif` = AF8. Tables below show Unicode only for documentation.
+On-disk `.alif` = UTF-8 (editor) or AF8. `alifc` accepts both. Tables below show Unicode for documentation.
 
 ---
 
@@ -55,7 +55,7 @@ Lengths and bytes must match `lang/keywords.h`.
 
 ---
 
-## 4. Sample `add` as AF8 (no compiler yet)
+## 4. Sample `add` as AF8
 
 Logical:
 
@@ -74,11 +74,11 @@ Logical:
 
 A lexer would emit tokens: `KW_SHURU`, `KW_ADAD`, `IDENT الف`, `=`, `NUM 2`, `؛`, …
 
-The compiler (later) would emit assembly equivalent to `examples/add.afb`.
+`alifc` emits assembly equivalent to `examples/add.afb` (then `afas` / `alif`).
 
 ---
 
-## 5. Lexer sketch (for later)
+## 5. Lexer sketch (`alifc`)
 
 ```
 c = next byte

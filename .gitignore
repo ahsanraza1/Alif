@@ -2,6 +2,10 @@
 /alif
 /alif.exe
 /afas/afas
+/alifc/alifc
+/alifc/mk_samples
+/alifc/samples/*.afb
+/alifc/samples/*.afbin
 *.exe
 *.o
 *.obj

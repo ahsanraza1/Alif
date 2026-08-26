@@ -7,8 +7,9 @@ SAMPLE  = tests/add.afbin
 ADD     = examples/add.afbin
 HELLO   = examples/hello.afbin
 AFAS    = afas/afas
+ALIFC   = alifc/alifc
 
-.PHONY: all clean smoke examples afas
+.PHONY: all clean smoke examples afas alifc
 
 all: $(ALIF)
 
@@ -19,6 +20,11 @@ $(AFAS): afas/afas.c src/load.c include/alf.h include/opcodes.h
 	$(CC) $(CFLAGS) -o $(AFAS) afas/afas.c src/load.c
 
 afas: $(AFAS)
+
+$(ALIFC): alifc/alifc.c lang/keywords.h af8/af8.h
+	$(CC) -std=c11 -Wall -Wextra -Werror -o $(ALIFC) alifc/alifc.c
+
+alifc: $(ALIFC)
 
 $(SMOKE): tests/smoke.c src/vm.c include/alif.h include/opcodes.h
 	$(CC) $(CFLAGS) -o $(SMOKE) tests/smoke.c src/vm.c
@@ -41,4 +47,5 @@ clean:
 	rm -f $(ALIF) $(ALIF).exe $(SMOKE) $(SMOKE).exe $(MKEX) $(MKEX).exe
 	rm -f tests/mk_add tests/mk_add.exe $(SAMPLE)
 	rm -f $(AFAS) $(AFAS).exe
+	rm -f $(ALIFC) $(ALIFC).exe alifc/mk_samples alifc/mk_samples.exe
 

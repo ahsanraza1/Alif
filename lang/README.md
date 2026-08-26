@@ -3,9 +3,9 @@
 This is the **programming language** layer. It is independent of the VM.
 
 ```
-.alif   (AF8 bytes, Urdu source)     language  — this folder
+.alif   (UTF-8 or AF8 Urdu source)   lang/  +  alifc/
    |
-   |  future compiler (not built)
+   |  alifc  (alifc/)
    v
 .afb    (ASCII assembly)             afas/
    |
@@ -16,7 +16,7 @@ This is the **programming language** layer. It is independent of the VM.
    |  VM
 ```
 
-`alif.exe` and `afas` do not read `.alif` files. Transcoders/editors for showing AF8 as Urdu glyphs are **later**. Specs here use Unicode so humans can read the grammar; on disk a `.alif` file is **AF8** (`af8/`).
+`alif.exe` and `afas` do not read `.alif` files. **`alifc`** does. On-disk a `.alif` file is **UTF-8** (editor) or **AF8**. `alifc` accepts both. Specs here use Unicode so humans can read the grammar.
 
 ---
 
@@ -96,7 +96,7 @@ Loop:
 2. Exactly one program: `شروع` … statements … `ختم`.
 3. Nothing after `ختم` except comments/whitespace.
 
-Harakat (`َُِ` etc.) are **not** part of v1 tokens: a well-formed `.alif` should omit them. If present, a future lexer may strip `AF8_IS_HARAKAT`.
+Harakat (`َُِ` etc.) are **not** part of v1 tokens: a well-formed `.alif` should omit them. `alifc` rejects them (`AF8_IS_HARAKAT`).
 
 Statement terminator is **Urdu semicolon** `؛` (`AF8_SEMICOLON`, `0xB1`). ASCII `;` is an accepted alias.
 
@@ -159,7 +159,7 @@ No mixing of ASCII and Urdu digits inside one number. `12` and `۱۲` are both t
 | `{` `}` | block |
 | `؛` or `;` | end of statement |
 
-`اور` / `یا` / `نہیں` are **short-circuit** in the compiler later (`اگر` style): `یا` stops on first nonzero, `اور` on first zero.
+`اور` / `یا` / `نہیں` are **short-circuit** (`اگر` style): `یا` stops on first nonzero, `اور` on first zero.
 
 ---
 
@@ -175,9 +175,9 @@ Suggested (not enforced) short names: `الف` `ب` `ج` `ن` `جواب`.
 
 ---
 
-## Semantics (for the future compiler)
+## Semantics (`alifc`)
 
-Informal lowering onto today’s ISA — not implemented here:
+How **`alifc`** lowers onto today’s ISA:
 
 | Source | Assembly idea |
 |---|---|
@@ -188,7 +188,7 @@ Informal lowering onto today’s ISA — not implemented here:
 | `جبتک expr { A }` | label, expr, `JZ` exit, A, `JMP` label |
 | end of `ختم` | `HLT` |
 
-Variables: compiler-chosen; v1 can keep locals in RAM (`LOAD`/`STORE`) so more than 8 names are possible. Registers are an optimization.
+Variables live in RAM (`LOAD`/`STORE`) so more than 8 names are possible. Expression temps use `R1`/`R2` plus `PUSH`/`POP`.
 
 `پڑھو ن؛` — v1 reads **one byte** from port 0 (`IN`) and zero-extends into `ن`. A later language version can define decimal input on another port.
 
@@ -208,4 +208,5 @@ Functions, arrays, strings, `break`/`continue`, floats, modules, pointers. Add t
 |---|---|
 | this README | overview |
 | [`GRAMMAR.md`](GRAMMAR.md) | token rules + keyword AF8 bytes |
-| [`keywords.h`](keywords.h) | the same words as C macros for a future compiler |
+| [`keywords.h`](keywords.h) | reserved words as AF8 macros |
+| Compiler | [`../alifc/`](../alifc/) **`alifc`**: `.alif` → `.afb` |
