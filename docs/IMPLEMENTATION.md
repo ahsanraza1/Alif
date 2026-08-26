@@ -14,25 +14,30 @@ src/vm.c             fetch-decode-execute loop
 src/load.c           .afbin reader/writer
 src/alif.c           launcher main (binary name: alif)
 examples/*.afbin     programs (the only files alif runs)
-examples/README.md   how to write a .afbin by hand
+examples/*.afb       optional assembly; assembled by afas, not by alif
+afas/afas.c          optional assembler (.afb → .afbin)
+afas/README.md       assembly language
 tests/smoke.c        bring-up: ALU, RAM, and every fault class
 tests/mk_examples.c  writes examples/add.afbin and examples/hello.afbin
-Makefile             builds alif
+build.bat            gcc build on Windows (no make)
+Makefile             optional, if you have GNU make
 .gitignore           host binaries, *.exe, retired *.alf
 ```
 
-Build (from the repo root):
+Build (from the repo root). **gcc is enough; make is optional.**
 
 ```
-make            # gcc -o alif src/alif.c src/load.c src/vm.c
-make examples   # emit examples/*.afbin
-make smoke      # engine tests + alif examples/add.afbin and hello.afbin
+build.bat           # alif.exe + afas\afas.exe
+build.bat alif      # launcher only
+build.bat afas      # assembler only
 ```
 
-Windows without make:
+Same commands without the script:
 
 ```
-gcc -std=c11 -Wall -Wextra -Werror -I include -o alif src/alif.c src/load.c src/vm.c
+gcc -std=c11 -Wall -Wextra -Werror -I include -o alif.exe src/alif.c src/load.c src/vm.c
+gcc -std=c11 -Wall -Wextra -Werror -I include -o afas/afas.exe afas/afas.c src/load.c
+gcc -std=c11 -Wall -Wextra -Werror -I include -o tests/smoke.exe tests/smoke.c src/vm.c
 ```
 
 `opcodes.h` stays **defines only**. The engine is ordinary C in `vm.c`. The launcher is the only program that talks to the filesystem.
@@ -202,7 +207,7 @@ Worked values: ISA §9. `tests/smoke.c` encodes the `2+3` program the same way. 
 
 Loader rejects: path not ending in `.afbin`, missing file, short file, bad magic, version ≠ 1.0, nonzero reserved words, `code_size` not a multiple of 4 or > 16 MiB, `data_size` > 1024, entry not 4-aligned or not inside code, file length ≠ header + code + data, `malloc` failure.
 
-The engine still never `fopen`s. Only the launcher does.
+The engine still never `fopen`s. Only the launcher does. The assembler (`afas`) is a different binary; `alif` never invokes it.
 
 ---
 

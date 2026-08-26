@@ -1,6 +1,7 @@
 # Build products
 /alif
 /alif.exe
+/afas/afas
 *.exe
 *.o
 *.obj
@@ -18,6 +19,18 @@
 
 # Retired program extension
 *.alf
+
+# Editor / OS
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vs/
+.vscode/
+*.user
+
 
 # Editor / OS
 *~

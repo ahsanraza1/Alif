@@ -1,0 +1,8 @@
+; branch.afb — CMP / JE using a label (absolute IP filled in by afas)
+        MOVI    R1, 1
+        CMP     R1, R1
+        JE      ok
+        TRAP    1
+ok:
+        OUT     1, R1
+        HLT

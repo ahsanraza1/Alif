@@ -1,0 +1,12 @@
+; hello.afb — write ALIF and a newline via port 0 (putchar)
+        MOVI    R1, 'A'
+        OUT     0, R1
+        MOVI    R1, 'L'
+        OUT     0, R1
+        MOVI    R1, 'I'
+        OUT     0, R1
+        MOVI    R1, 'F'
+        OUT     0, R1
+        MOVI    R1, '\n'
+        OUT     0, R1
+        HLT

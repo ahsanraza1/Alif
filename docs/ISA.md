@@ -569,9 +569,11 @@ alif_exec_from(&vm, payload, sizeof payload, entry); /* IP = entry */
 
 ### 10.2 On-disk `.afbin` image (launcher `alif`)
 
-A complete ALIF program **is** a `.afbin` file. Programmers write one (hex editor, or `alif_write_afbin`); a future compiler’s only object format is `.afbin`. `alif.exe` / `alif` loads that file and runs the VM. There is no second source format.
+A complete ALIF **binary** program is a `.afbin` file. `alif.exe` / `alif` loads that file and runs the VM. The launcher does **not** read assembly.
 
-Worked images (with a byte-level map): `examples/add.afbin`, `examples/hello.afbin`, [`examples/README.md`](../examples/README.md).
+Optional path: write `.afb` assembly and run the separate assembler **`afas`** (`afas/`) to emit `.afbin`. That tool is not part of the VM; skipping it does not change `alif` behaviour.
+
+Worked images: `examples/add.afbin`, `examples/hello.afbin`. Assembly sources for the same programs: `examples/add.afb`, `examples/hello.afb` (see [`afas/README.md`](../afas/README.md)).
 
 The `alif` binary (`src/alif.c` + `src/load.c`) reads a **version-1.0** image. Extension is `.afbin` (required by the launcher, any case). Magic is the four ASCII bytes `A L I F` (not NUL-terminated). All multi-byte header fields are **little-endian**. File length must equal `32 + code_size + data_size` exactly (no padding, no trailing bytes).
 
@@ -612,6 +614,17 @@ alif program.afbin
 | 2 | VM fault (`ILL`/`ALIGN`/`MEM`/…); `ip` printed on stderr |
 | 1–255 | `TRAP` imm16 when nonzero (host exit status) |
 
+### 10.3 Assembly source (`.afb`) — tool `afas`
+
+Not consumed by the VM. The assembler lives in `afas/` and is optional:
+
+```
+afas program.afb              # writes program.afbin
+alif program.afbin            # unchanged launcher
+```
+
+Language contract: [`afas/README.md`](../afas/README.md). Adding an opcode requires a mnemonic in `afas/afas.c` **in addition to** `opcodes.h` / `vm.c`; `alif` does not need `afas` to keep running existing `.afbin` files.
+
 ---
 
 ## 11. What is deliberately absent
@@ -637,8 +650,9 @@ alif program.afbin
 | Machine struct, RAM size, fault macros, `alif_exec` | `include/alif.h` |
 | `.afbin` header, `alif_load_afbin` / `alif_write_afbin` | `include/alf.h`, `src/load.c` |
 | Launcher CLI | `src/alif.c` (binary: `alif`) |
+| Optional assembler `.afb` → `.afbin` | `afas/afas.c` (binary: `afas`) |
 | Fetch-decode-execute loop and bounds checks | `src/vm.c` |
 | Behaviour, Harvard split, I/O ports, encoding examples | this file |
 | How the C loop is structured | `docs/IMPLEMENTATION.md` |
 
-When adding an opcode: assign the number in `opcodes.h`, implement a `case` in `src/vm.c`, add a row to §5 and a subsection to §7 **in the same change**.
+When adding an opcode: assign the number in `opcodes.h`, implement a `case` in `src/vm.c`, add a row to §5 and a subsection to §7 **in the same change**. If the assembler should accept it, add a mnemonic in `afas/afas.c` (optional; does not affect `alif`).

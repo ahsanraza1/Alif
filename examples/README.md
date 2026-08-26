@@ -1,25 +1,32 @@
 # ALIF programs (`.afbin`)
 
-This directory is the **program** side of ALIF. Humans (with a hex editor) or a future compiler produce **only** `.afbin` files. `alif.exe` / `alif` reads one file and runs the VM. The VM never sees C source.
+This directory holds programs. **`alif.exe` only runs `.afbin`.** Optional `.afb` assembly is translated by **`afas`**, a separate tool (`afas/`). The VM does not depend on `afas`.
 
 ```
-programmer / compiler
-        |
-        |  writes
-        v
-   something.afbin    ← this is the whole program
-        |
-        |  alif.exe
-        v
-   registers + 1 KiB RAM + fetch-decode-execute
+programmer
+    |
+    |  (optional) write assembly
+    v
+something.afb
+    |
+    |  afas          ← not part of alif.exe
+    v
+something.afbin      ← this is what alif.exe runs
+    |
+    |  alif.exe
+    v
+VM
 ```
 
-| File | What it does | Run |
-|---|---|---|
-| [`add.afbin`](add.afbin) | `R1 = 2 + 3`, print `5`, halt | `alif examples/add.afbin` |
-| [`hello.afbin`](hello.afbin) | write `ALIF` and a newline, halt | `alif examples/hello.afbin` |
+| File | What it does | Assemble | Run |
+|---|---|---|---|
+| [`add.afb`](add.afb) / [`add.afbin`](add.afbin) | `R1 = 2 + 3`, print `5` | `afas\afas.exe examples/add.afb` | `alif.exe examples/add.afbin` |
+| [`hello.afb`](hello.afb) / [`hello.afbin`](hello.afbin) | write `ALIF` | `afas\afas.exe examples/hello.afb` | `alif.exe examples/hello.afbin` |
+| [`branch.afb`](branch.afb) | `CMP` / `JE` with a label | `afas\afas.exe examples/branch.afb` | `alif.exe examples/branch.afbin` |
 
-The launcher **requires** the `.afbin` suffix (any case). Rebuild the binaries (after changing the emitter): `make examples`.
+Assembly language: [`../afas/README.md`](../afas/README.md). The launcher **requires** the `.afbin` suffix.
+
+You can still emit `.afbin` without `afas` (hex editor, `alif_write_afbin`, or `gcc` + `tests/mk_examples.c`).
 
 ---
 
@@ -77,7 +84,7 @@ Same header pattern, `code_size = 44` (`2C 00 00 00` at offset 0x0C). Code is `M
 
 ## Writing your own
 
-Until a compiler exists, pack words with `alif_write_afbin` (`include/alf.h`) or a hex editor. Rules the loader enforces:
+Until a compiler exists, write `.afb` and run `afas`, or pack words with `alif_write_afbin` (`include/alf.h`) or a hex editor. `alif` only cares about the `.afbin` rules:
 
 - filename ends with `.afbin`
 - magic must be `ALIF`

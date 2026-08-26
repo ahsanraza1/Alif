@@ -1,0 +1,6 @@
+; add.afb — R1 = 2 + 6, print decimal, halt
+        MOVI    R1, 2
+        MOVI    R2, 6
+        ADD     R1, R1, R2
+        OUT     1, R1
+        HLT

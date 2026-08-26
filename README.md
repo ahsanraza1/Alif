@@ -13,31 +13,60 @@ ALIF is a custom **register-based virtual machine** written in pure C. The machi
 | [`include/alf.h`](include/alf.h) | C sources | `.afbin` image load/write |
 | [`src/vm.c`](src/vm.c) | C sources | Execution engine |
 | [`src/load.c`](src/load.c) | C sources | `.afbin` file I/O |
-| [`src/alif.c`](src/alif.c) | C sources | Launcher (`alif`) |
-| [`examples/`](examples/) | programmers / compilers | `.afbin` programs — the only file `alif` runs |
+| [`src/alif.c`](src/alif.c) | C sources | Launcher (`alif`) — runs `.afbin` only |
+| [`afas/`](afas/) | optional assembler | **`afas`**: `.afb` assembly → `.afbin` |
+| [`examples/`](examples/) | programs | `.afb` sources and `.afbin` images |
 | [`tests/smoke.c`](tests/smoke.c) | bring-up | ALU, RAM, and fault-class checks |
 
 ## Build and run
 
-```
-make
-make examples
-./alif examples/add.afbin
-./alif examples/hello.afbin
-```
-
-Without make (Windows / MSYS gcc):
+You need **gcc**. You do **not** need `make`. From the repo root:
 
 ```
-gcc -std=c11 -Wall -Wextra -Werror -I include -o alif src/alif.c src/load.c src/vm.c
-gcc -std=c11 -Wall -Wextra -Werror -I include -o tests/mk_examples tests/mk_examples.c src/load.c
-./tests/mk_examples
-./alif examples/add.afbin
+build.bat
 ```
 
-`examples/add.afbin` prints `5`. `examples/hello.afbin` prints `ALIF`. Byte-level format for hand-written images: [`examples/README.md`](examples/README.md).
+That produces `alif.exe` and `afas\afas.exe`. Same thing by hand:
 
-**Pipeline:** a programmer or a future compiler writes **only** a `.afbin` file. `alif.exe` loads it and runs the VM. No other input format.
+```
+gcc -std=c11 -Wall -Wextra -Werror -I include -o alif.exe src/alif.c src/load.c src/vm.c
+gcc -std=c11 -Wall -Wextra -Werror -I include -o afas/afas.exe afas/afas.c src/load.c
+```
+
+Only the VM launcher:
+
+```
+build.bat alif
+```
+
+Only the assembler:
+
+```
+build.bat afas
+```
+
+Then:
+
+```
+alif.exe examples/add.afbin
+```
+
+Assemble source, then run (two separate programs):
+
+```
+afas\afas.exe examples/add.afb
+alif.exe examples/add.afbin
+```
+
+```
+programmer  →  program.afb  →  afas.exe  →  program.afbin  →  alif.exe  →  VM
+```
+
+`examples/add.afbin` prints `5`. `examples/hello.afbin` prints `ALIF`. Assembly language: [`afas/README.md`](afas/README.md). Binary layout: [`examples/README.md`](examples/README.md).
+
+**`alif` pipeline:** `.afbin` → VM. **`afas` pipeline (optional):** `.afb` → `.afbin`. `alif` never reads `.afb`.
+
+A `Makefile` is in the tree for people who have GNU make. It is not required.
 
 Usage: `alif <program.afbin>` — the path must end in `.afbin`.
 
