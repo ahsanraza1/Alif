@@ -22,16 +22,18 @@ lang/                علیف language grammar and keyword bytes
 alifc/               compiler .alif → .afb (does not run the VM)
 tests/smoke.c        bring-up: ALU, RAM, and every fault class
 tests/mk_examples.c  writes examples/add.afbin and examples/hello.afbin
-build.bat            gcc build on Windows (no make)
+build.bat            gcc build on Windows (no make); fills ship\
+scripts/run.bat      driver copied to ship\run.bat (.alif → VM)
+scripts/SHIP.txt     copied to ship\README.txt
 Makefile             optional, if you have GNU make
-.gitignore           host binaries, *.exe, retired *.alf
+.gitignore           host binaries, ship/, *.exe, retired *.alf
 ```
 
 Build (from the repo root). **gcc is enough; make is optional.**
 
 ```
-build.bat           # alif.exe + afas\afas.exe + alifc\alifc.exe
-build.bat alif      # launcher only
+build.bat           # alif.exe + afas\afas.exe + alifc\alifc.exe, copied to ship\
+build.bat alif      # launcher only (also copied into ship\)
 build.bat afas      # assembler only
 build.bat alifc     # compiler only
 ```

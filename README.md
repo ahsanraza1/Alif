@@ -29,7 +29,7 @@ You need **gcc**. You do **not** need `make`. From the repo root:
 build.bat
 ```
 
-That produces `alif.exe`, `afas\afas.exe`, and `alifc\alifc.exe`. Same thing by hand:
+That produces `alif.exe`, `afas\afas.exe`, and `alifc\alifc.exe`, and copies them into **`ship\`** (gitignored) with `run.bat`. Same thing by hand:
 
 ```
 gcc -std=c11 -Wall -Wextra -Werror -I include -o alif.exe src/alif.c src/load.c src/vm.c
@@ -54,6 +54,14 @@ Only the compiler:
 ```
 build.bat alifc
 ```
+
+Ship folder (the three `.exe` files plus `run.bat`):
+
+```
+ship\run.bat alifc\samples\add.alif
+```
+
+Copy `ship\` to someone else; they only need that folder. `run.bat` calls `alifc.exe`, then `afas.exe`, then `alif.exe`. The tools stay separate.
 
 Then:
 

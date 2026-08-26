@@ -32,6 +32,8 @@ afas\afas.exe alifc\samples\add.afb
 alif.exe alifc\samples\add.afbin
 ```
 
+After `build.bat`, the same chain is `ship\run.bat alifc\samples\add.alif`. `run.bat` only calls the three programs; it does not merge them.
+
 Default output: same path with `.alif` replaced by `.afb`. `-o file.afb` to override.
 
 | Exit | Meaning |

@@ -1,0 +1,13 @@
+ALIF tools — copy this folder as-is.
+
+  run.bat program.alif     compile + assemble + run
+  alifc.exe                .alif  -> .afb
+  afas.exe                 .afb   -> .afbin
+  alif.exe                 .afbin -> VM
+
+The three .exe files are independent. run.bat only calls them in order.
+
+  run.bat program.alif
+
+Writes program.afb and program.afbin next to the .alif, then runs the VM.
+Pass one .alif path.
