@@ -193,6 +193,6 @@ The future compiler includes `af8.h` and lexes `unsigned char`. It emits **`.afb
 
 ## 6. Next (not done)
 
-1. Language grammar (Urdu keywords as AF8 letter sequences).
+1. Language grammar — **`lang/`** (علیف v1).
 2. Compiler: `.alif` (AF8) → `.afb`.
-3. Optional UTF-8 → AF8 filter using `af8_map.h`.
+3. Optional UTF-8 → AF8 filter / editor display using `af8_map.h`.

@@ -18,6 +18,7 @@ examples/*.afb       optional assembly; assembled by afas, not by alif
 afas/afas.c          optional assembler (.afb → .afbin)
 afas/README.md       assembly language
 af8/                 AF8 8-bit Urdu page for future .alif compiler (VM-independent)
+lang/                علیف language grammar and keyword bytes (no compiler yet)
 tests/smoke.c        bring-up: ALU, RAM, and every fault class
 tests/mk_examples.c  writes examples/add.afbin and examples/hello.afbin
 build.bat            gcc build on Windows (no make)

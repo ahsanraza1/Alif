@@ -652,6 +652,7 @@ Language contract: [`afas/README.md`](../afas/README.md). Adding an opcode requi
 | Launcher CLI | `src/alif.c` (binary: `alif`) |
 | Optional assembler `.afb` → `.afbin` | `afas/afas.c` (binary: `afas`) |
 | 8-bit Urdu source encoding (future `.alif`, not VM) | `af8/` |
+| علیف language grammar (compiler not built) | `lang/` |
 | Fetch-decode-execute loop and bounds checks | `src/vm.c` |
 | Behaviour, Harvard split, I/O ports, encoding examples | this file |
 | How the C loop is structured | `docs/IMPLEMENTATION.md` |
